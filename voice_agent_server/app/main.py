@@ -116,3 +116,7 @@ async def voice_chat(
 def clear_chat_session(session_id: str = "default"):
     clear_session(session_id)
     return JSONResponse({"message": f"Session '{session_id}' cleared!"})
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
