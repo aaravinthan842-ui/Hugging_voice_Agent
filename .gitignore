@@ -32,3 +32,13 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+.env
+.env.*
+**/.env
+**/.env.*
+
+node_modules/
+dist/
+
+__pycache__/
+*.pyc

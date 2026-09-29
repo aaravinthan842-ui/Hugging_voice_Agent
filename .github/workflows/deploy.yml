@@ -1,0 +1,62 @@
+name: Deploy Voice Agent
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            set -e
+
+            cd /home/ubuntu/Hugging_voice_Agent
+
+            echo "Pulling latest code..."
+            git pull origin main
+
+            echo "Stopping old backend..."
+            docker stop voice-agent-backend || true
+            docker rm voice-agent-backend || true
+
+            echo "Stopping old frontend..."
+            docker stop voice-agent-frontend || true
+            docker rm voice-agent-frontend || true
+
+            echo "Building backend image..."
+            docker build \
+              -t voice-agent-backend:latest \
+              ./voice_agent_server
+
+            echo "Building frontend image..."
+            docker build \
+              -t voice-agent-frontend:latest \
+              ./voice_agent_screen
+
+            echo "Starting backend..."
+            docker run -d \
+              --name voice-agent-backend \
+              --env-file ./voice_agent_server/.env \
+              -p 8000:8000 \
+              voice-agent-backend:latest
+
+            echo "Starting frontend..."
+            docker run -d \
+              --name voice-agent-frontend \
+              -p 80:80 \
+              voice-agent-frontend:latest
+
+            echo "Checking containers..."
+            docker ps
+
+            echo "Deployment completed!"
