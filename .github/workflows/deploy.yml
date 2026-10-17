@@ -1,4 +1,4 @@
-name: Deploy Voice Agent
+ name: Deploy Voice Agent
 
 on:
   push:
